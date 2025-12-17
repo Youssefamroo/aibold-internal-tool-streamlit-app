@@ -1,5 +1,6 @@
+
 import streamlit as st
-import anthropic
+import google.generativeai as genai
 import os
 from datetime import datetime
 
@@ -117,18 +118,18 @@ with st.sidebar:
     st.divider()
     
     # API Key configuration
-    with st.expander("⚙️ API Configuration"):
+    with st.expander("⚙️ API Configuration", expanded=not st.session_state.api_key):
         api_key = st.text_input(
-            "Anthropic API Key",
+            "Gemini API Key",
             type="password",
             value=st.session_state.api_key,
-            help="Get free key at console.anthropic.com"
+            help="Get free key at aistudio.google.com"
         )
         if st.button("Save API Key"):
             st.session_state.api_key = api_key
             st.success("API Key saved!")
         
-        st.caption("💡 Get free API key: [console.anthropic.com](https://console.anthropic.com)")
+        st.caption("💡 Get free API key: [Google AI Studio](https://aistudio.google.com/app/apikey)")
 
 # Main area
 if not st.session_state.logged_in:
@@ -136,7 +137,7 @@ if not st.session_state.logged_in:
     st.markdown("""
     ### Get Started
     1. Login with your email in the sidebar
-    2. Add your API key (get free at console.anthropic.com)
+    2. Add your **Google Gemini API key** (free at aistudio.google.com)
     3. Select your department
     4. Start chatting!
     
@@ -157,8 +158,8 @@ else:
     
     # Check for API key
     if not st.session_state.api_key:
-        st.warning("⚠️ Please add your API key in the sidebar to start chatting")
-        st.info("Get a free API key at: https://console.anthropic.com")
+        st.warning("⚠️ Please add your Gemini API key in the sidebar to start chatting")
+        st.info("Get a free API key at: https://aistudio.google.com/app/apikey")
         st.stop()
     
     # Display chat messages
@@ -176,7 +177,12 @@ else:
     
     # Display conversation
     for message in messages:
-        with st.chat_message(message["role"]):
+        # Map 'model' role to 'assistant' for UI display compatibility if needed, 
+        # but we stick to standard "user" / "assistant" in session state for UI.
+        role_display = message["role"]
+        if role_display == "model": role_display = "assistant"
+        
+        with st.chat_message(role_display):
             st.markdown(message["content"])
     
     # Chat input
@@ -192,25 +198,33 @@ else:
             message_placeholder.markdown("▌")
             
             try:
-                # Call Anthropic API
-                client = anthropic.Anthropic(api_key=st.session_state.api_key)
+                # Configure Gemini
+                genai.configure(api_key=st.session_state.api_key)
                 
-                # Prepare messages for API
-                api_messages = [
-                    {"role": msg["role"], "content": msg["content"]}
-                    for msg in messages
-                ]
+                # Create model
+                # System instructions are set at model creation in Gemini
+                model = genai.GenerativeModel(
+                    'gemini-1.5-flash',
+                    system_instruction=config["system"]
+                )
+                
+                # Prepare history for Gemini
+                # Gemini expects 'user' and 'model' roles
+                gemini_history = []
+                for msg in messages[:-1]: # Exclude the very last message which is the current prompt
+                    role = "user" if msg["role"] == "user" else "model"
+                    gemini_history.append({"role": role, "parts": [msg["content"]]})
+                
+                # Start chat
+                chat = model.start_chat(history=gemini_history)
                 
                 # Stream response
                 full_response = ""
-                with client.messages.stream(
-                    model="claude-3-5-sonnet-20241022",
-                    max_tokens=1024,
-                    system=config["system"],
-                    messages=api_messages,
-                ) as stream:
-                    for text in stream.text_stream:
-                        full_response += text
+                response_stream = chat.send_message(prompt, stream=True)
+                
+                for chunk in response_stream:
+                    if chunk.text:
+                        full_response += chunk.text
                         message_placeholder.markdown(full_response + "▌")
                 
                 message_placeholder.markdown(full_response)
