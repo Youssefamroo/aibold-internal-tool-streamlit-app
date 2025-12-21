@@ -13,43 +13,43 @@ st.set_page_config(
 
 # User credentials and permissions
 USERS = {
-    "youssef.aibold": {
-        "password": "aibold@youssef",
+    "youssef@aibold": {
+        "password": "aibold.youssef",
         "role": "admin",
         "departments": "all"  # Admin has access to all departments
     },
-    "ragwa.aibold": {
-        "password": "aibold@ragwa",
+    "ragwa@aibold": {
+        "password": "aibold.ragwa",
         "role": "admin",
         "departments": "all"
     },
-    "saeed.aibold": {
-        "password": "aibold@saeed",
+    "saeed@aibold": {
+        "password": "aibold.saeed",
         "role": "user",
         "departments": ["Marketing", "Sales", "General Research"]
     },
-    "osama.aibold": {
-        "password": "aibold@osama",
+    "osama@aibold": {
+        "password": "aibold.osama",
         "role": "user",
         "departments": ["Marketing", "Sales", "General Research"]
     },
-    "zeinab.aibold": {
-        "password": "aibold@zeinab",
+    "zeinab@aibold": {
+        "password": "aibold.zeinab",
         "role": "user",
         "departments": ["Marketing", "Sales", "General Research"]
     },
-    "gamal.aibold": {
-        "password": "aibold@gamal",
+    "gamal@aibold": {
+        "password": "aibold.gamal",
         "role": "user",
         "departments": ["Content Creation & Design", "General Research"]
     },
-    "roba.aibold": {
-        "password": "aibold@roba",
+    "roba@aibold": {
+        "password": "aibold.roba",
         "role": "user",
         "departments": ["General Research"]
     },
-    "yara.aibold": {
-        "password": "aibold@yara",
+    "yara@aibold": {
+        "password": "aibold.yara",
         "role": "user",
         "departments": ["General Research"]
     }
@@ -135,7 +135,7 @@ with st.sidebar:
     # Login section
     if not st.session_state.logged_in:
         st.subheader("Login")
-        username = st.text_input("Username", placeholder="username.aibold")
+        username = st.text_input("Username", placeholder="name@aibold")
         password = st.text_input("Password", type="password", placeholder="Enter password")
         
         if st.button("Login", use_container_width=True):
