@@ -11,8 +11,61 @@ st.set_page_config(
     layout="wide"
 )
 
+# User credentials and permissions
+USERS = {
+    "youssef.aibold": {
+        "password": "aibold@youssef",
+        "role": "admin",
+        "departments": "all"  # Admin has access to all departments
+    },
+    "ragwa.aibold": {
+        "password": "aibold@ragwa",
+        "role": "admin",
+        "departments": "all"
+    },
+    "saeed.aibold": {
+        "password": "aibold@saeed",
+        "role": "user",
+        "departments": ["Marketing", "Sales", "General Research"]
+    },
+    "osama.aibold": {
+        "password": "aibold@osama",
+        "role": "user",
+        "departments": ["Marketing", "Sales", "General Research"]
+    },
+    "zeinab.aibold": {
+        "password": "aibold@zeinab",
+        "role": "user",
+        "departments": ["Marketing", "Sales", "General Research"]
+    },
+    "gamal.aibold": {
+        "password": "aibold@gamal",
+        "role": "user",
+        "departments": ["Content Creation & Design", "General Research"]
+    },
+    "roba.aibold": {
+        "password": "aibold@roba",
+        "role": "user",
+        "departments": ["General Research"]
+    },
+    "yara.aibold": {
+        "password": "aibold@yara",
+        "role": "user",
+        "departments": ["General Research"]
+    }
+}
+
 # Department configurations
 DEPARTMENTS = {
+    "Tech": {
+        "icon": "⚙️",
+        "system": "You are a technical AI assistant. Help with code review, debugging, architecture decisions, and technical documentation. Be precise and technical.",
+        "examples": [
+            "Review my Python code",
+            "Debug this error message",
+            "Design a scalable system architecture"
+        ]
+    },
     "Marketing": {
         "icon": "📊",
         "system": "You are a marketing AI assistant. Help with campaign ideas, copy writing, social media content, and market analysis. Be creative and brand-focused.",
@@ -31,22 +84,22 @@ DEPARTMENTS = {
             "Qualify leads effectively"
         ]
     },
-    "Engineering": {
-        "icon": "⚙️",
-        "system": "You are a technical AI assistant. Help with code review, debugging, architecture decisions, and technical documentation. Be precise and technical.",
+    "Content Creation & Design": {
+        "icon": "🎨",
+        "system": "You are a creative AI assistant. Help with content creation, design concepts, visual storytelling, and creative direction. Be imaginative and aesthetically focused.",
         "examples": [
-            "Review my Python code",
-            "Debug this error message",
-            "Design a scalable system architecture"
+            "Generate blog post ideas",
+            "Create a design brief for a campaign",
+            "Suggest color palettes for our brand"
         ]
     },
-    "Customer Support": {
-        "icon": "💬",
-        "system": "You are a customer support AI assistant. Help with response templates, issue resolution, and customer communication. Be empathetic and solution-focused.",
+    "General Research": {
+        "icon": "🔍",
+        "system": "You are a research AI assistant. Help with information gathering, data analysis, competitive research, and insights generation. Be thorough and analytical.",
         "examples": [
-            "Draft a response to an angry customer",
-            "Handle a refund request professionally",
-            "Create FAQ answers"
+            "Research industry trends",
+            "Analyze competitor strategies",
+            "Summarize research findings"
         ]
     }
 }
@@ -61,10 +114,13 @@ if "api_key" not in st.session_state:
     st.session_state.api_key = ""
 
 if "selected_dept" not in st.session_state:
-    st.session_state.selected_dept = "Marketing"
+    st.session_state.selected_dept = None
 
-if "user_email" not in st.session_state:
-    st.session_state.user_email = ""
+if "username" not in st.session_state:
+    st.session_state.username = ""
+
+if "user_permissions" not in st.session_state:
+    st.session_state.user_permissions = []
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -79,20 +135,46 @@ with st.sidebar:
     # Login section
     if not st.session_state.logged_in:
         st.subheader("Login")
-        email = st.text_input("Email", placeholder="you@company.com")
-        if st.button("Access AI", use_container_width=True):
-            if email:
-                st.session_state.user_email = email
-                st.session_state.logged_in = True
-                st.rerun()
+        username = st.text_input("Username", placeholder="username.aibold")
+        password = st.text_input("Password", type="password", placeholder="Enter password")
+        
+        if st.button("Login", use_container_width=True):
+            if username and password:
+                # Validate credentials
+                if username in USERS and USERS[username]["password"] == password:
+                    st.session_state.username = username
+                    st.session_state.logged_in = True
+                    
+                    # Set user permissions
+                    user_data = USERS[username]
+                    if user_data["departments"] == "all":
+                        st.session_state.user_permissions = list(DEPARTMENTS.keys())
+                    else:
+                        st.session_state.user_permissions = user_data["departments"]
+                    
+                    # Set default department to first accessible one
+                    if st.session_state.user_permissions:
+                        st.session_state.selected_dept = st.session_state.user_permissions[0]
+                    
+                    st.rerun()
+                else:
+                    st.error("❌ Invalid username or password")
+            else:
+                st.warning("⚠️ Please enter both username and password")
     else:
-        st.success(f"👤 {st.session_state.user_email}")
+        # Display user info
+        user_role = USERS[st.session_state.username]["role"]
+        role_badge = "👑 Admin" if user_role == "admin" else "👤 User"
+        st.success(f"{role_badge}: {st.session_state.username}")
         
         st.divider()
         
-        # Department selector
+        # Department selector - only show accessible departments
         st.subheader("Departments")
-        for dept, config in DEPARTMENTS.items():
+        accessible_depts = st.session_state.user_permissions
+        
+        for dept in accessible_depts:
+            config = DEPARTMENTS[dept]
             if st.button(
                 f"{config['icon']} {dept}",
                 use_container_width=True,
@@ -106,13 +188,16 @@ with st.sidebar:
         # Stats
         st.subheader("📊 Usage")
         st.metric("Messages Today", st.session_state.message_count)
+        st.caption(f"Access: {len(accessible_depts)} department{'s' if len(accessible_depts) > 1 else ''}")
         
         st.divider()
         
         # Logout
         if st.button("🚪 Logout", use_container_width=True):
             st.session_state.logged_in = False
-            st.session_state.user_email = ""
+            st.session_state.username = ""
+            st.session_state.user_permissions = []
+            st.session_state.selected_dept = None
             st.rerun()
     
     st.divider()
@@ -136,7 +221,7 @@ if not st.session_state.logged_in:
     st.title("🤖 Welcome to AI Assistant Hub")
     st.markdown("""
     ### Get Started
-    1. Login with your email in the sidebar
+    1. Login with your credentials in the sidebar
     2. Add your **Google Gemini API key** (free at aistudio.google.com)
     3. Select your department
     4. Start chatting!
@@ -145,7 +230,8 @@ if not st.session_state.logged_in:
     - 🎯 Department-specific AI assistants
     - 💬 Context-aware conversations
     - 📊 Usage tracking
-    - 🔒 Simple authentication
+    - 🔒 Role-based access control
+    - 👑 Admin and user permissions
     """)
 else:
     # Get current department config
@@ -154,7 +240,7 @@ else:
     
     # Header
     st.title(f"{config['icon']} {dept} AI Assistant")
-    st.caption(f"Logged in as: {st.session_state.user_email}")
+    st.caption(f"Logged in as: {st.session_state.username}")
     
     # Check for API key
     if not st.session_state.api_key:
