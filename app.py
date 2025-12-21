@@ -247,20 +247,8 @@ else:
         st.warning("⚠️ Please add your Gemini API key in the sidebar to start chatting")
         st.info("Get a free API key at: https://aistudio.google.com/app/apikey")
         st.stop()
-    
     # Display chat messages
-    messages = st.session_state.messages[dept]
-    
-    if len(messages) == 0:
-        st.info(f"👋 Welcome! I'm your {dept} AI assistant. Try these examples:")
-        cols = st.columns(len(config['examples']))
-        for i, example in enumerate(config['examples']):
-            with cols[i]:
-                if st.button(example, use_container_width=True):
-                    # Add example as user message and process
-                    messages.append({"role": "user", "content": example})
-                    st.rerun()
-    
+    messages = st.session_state.messages[dept]    
     # Display conversation
     for message in messages:
         # Map 'model' role to 'assistant' for UI display compatibility if needed, 
@@ -272,7 +260,18 @@ else:
             st.markdown(message["content"])
     
     # Chat input
-    if prompt := st.chat_input(f"Ask {dept} AI anything..."):
+    prompt = st.chat_input(f"Ask {dept} AI anything...")
+    
+    # Show examples if no messages and no chat input
+    if len(messages) == 0 and not prompt:
+        st.info(f"👋 Welcome! I'm your {dept} AI assistant. Try these examples:")
+        cols = st.columns(len(config['examples']))
+        for i, example in enumerate(config['examples']):
+            with cols[i]:
+                if st.button(example, use_container_width=True, key=f"ex_{dept}_{i}"):
+                    prompt = example
+                    
+    if prompt:
         # Add user message
         messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
