@@ -137,12 +137,15 @@ with st.sidebar:
         st.subheader("Login")
         username = st.text_input("Username", placeholder="name@aibold")
         password = st.text_input("Password", type="password", placeholder="Enter password")
+        api_key = st.text_input("Gemini API Key", type="password", placeholder="Enter your API key")
+        st.caption("💡 [Get free API key](https://aistudio.google.com/app/apikey)")
         
         if st.button("Login", use_container_width=True):
-            if username and password:
+            if username and password and api_key:
                 # Validate credentials
                 if username in USERS and USERS[username]["password"] == password:
                     st.session_state.username = username
+                    st.session_state.api_key = api_key
                     st.session_state.logged_in = True
                     
                     # Set user permissions
@@ -160,7 +163,7 @@ with st.sidebar:
                 else:
                     st.error("❌ Invalid username or password")
             else:
-                st.warning("⚠️ Please enter both username and password")
+                st.warning("⚠️ Please enter username, password, and API key")
     else:
         # Display user info
         user_role = USERS[st.session_state.username]["role"]
@@ -196,35 +199,23 @@ with st.sidebar:
         if st.button("🚪 Logout", use_container_width=True):
             st.session_state.logged_in = False
             st.session_state.username = ""
+            st.session_state.api_key = ""
             st.session_state.user_permissions = []
             st.session_state.selected_dept = None
             st.rerun()
     
     st.divider()
     
-    # API Key configuration
-    with st.expander("⚙️ API Configuration", expanded=not st.session_state.api_key):
-        api_key = st.text_input(
-            "Gemini API Key",
-            type="password",
-            value=st.session_state.api_key,
-            help="Get free key at aistudio.google.com"
-        )
-        if st.button("Save API Key"):
-            st.session_state.api_key = api_key
-            st.success("API Key saved!")
-        
-        st.caption("💡 Get free API key: [Google AI Studio](https://aistudio.google.com/app/apikey)")
+
 
 # Main area
 if not st.session_state.logged_in:
     st.title("🤖 Welcome to AI Assistant Hub")
     st.markdown("""
     ### Get Started
-    1. Login with your credentials in the sidebar
-    2. Add your **Google Gemini API key** (free at aistudio.google.com)
-    3. Select your department
-    4. Start chatting!
+    1. Enter your **Username**, **Password**, and **Gemini API Key** in the sidebar
+    2. Click **Login** to access your department
+    3. Start chatting with your AI assistant!
     
     ### Features
     - 🎯 Department-specific AI assistants
@@ -242,11 +233,7 @@ else:
     st.title(f"{config['icon']} {dept} AI Assistant")
     st.caption(f"Logged in as: {st.session_state.username}")
     
-    # Check for API key
-    if not st.session_state.api_key:
-        st.warning("⚠️ Please add your Gemini API key in the sidebar to start chatting")
-        st.info("Get a free API key at: https://aistudio.google.com/app/apikey")
-        st.stop()
+
     # Display chat messages
     messages = st.session_state.messages[dept]    
     # Display conversation
