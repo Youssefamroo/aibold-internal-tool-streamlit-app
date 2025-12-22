@@ -6,10 +6,73 @@ from datetime import datetime
 
 # Page config
 st.set_page_config(
-    page_title="Department AI Assistant",
-    page_icon="🤖",
+    page_title="AIBold | Internal AI OS",
+    page_icon="⚡",
     layout="wide"
 )
+
+# Custom Styling for AIBold Branding
+st.markdown("""
+<style>
+    /* Main background and font */
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        color: #e0e0e0;
+    }
+    
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background-color: rgba(15, 12, 41, 0.8) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Headers */
+    h1, h2, h3 {
+        font-family: 'Inter', sans-serif;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+        letter-spacing: -0.5px;
+    }
+    
+    /* Custom primary color for buttons */
+    .stButton > button {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .stButton > button:hover {
+        border-color: #6c5ce7;
+        color: #6c5ce7;
+        transform: translateY(-1px);
+    }
+    
+    /* Chat message aesthetic */
+    .stChatMessage {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 10px;
+    }
+    
+    /* Sidebar Titles */
+    .sidebar-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #a29bfe, #6c5ce7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+    }
+    
+    /* Success/Info boxes */
+    .stAlert {
+        background-color: rgba(108, 92, 231, 0.1);
+        border: 1px solid rgba(108, 92, 231, 0.2);
+        color: #a29bfe;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # User credentials and permissions
 USERS = {
@@ -130,7 +193,8 @@ if "message_count" not in st.session_state:
 
 # Sidebar
 with st.sidebar:
-    st.title("🤖 AI Assistant Hub")
+    st.markdown('<p class="sidebar-title">AIBold Core ⚡</p>', unsafe_allow_html=True)
+    st.caption("AI as a Service | Internal OS v1.2")
     
     # Login section
     if not st.session_state.logged_in:
@@ -173,7 +237,7 @@ with st.sidebar:
         st.divider()
         
         # Department selector - only show accessible departments
-        st.subheader("Departments")
+        st.subheader("Intelligence Nodes")
         accessible_depts = st.session_state.user_permissions
         
         for dept in accessible_depts:
@@ -189,8 +253,8 @@ with st.sidebar:
         st.divider()
         
         # Stats
-        st.subheader("📊 Usage")
-        st.metric("Messages Today", st.session_state.message_count)
+        st.subheader("🌐 Network Stats")
+        st.metric("Neural Requests", st.session_state.message_count)
         st.caption(f"Access: {len(accessible_depts)} department{'s' if len(accessible_depts) > 1 else ''}")
         
         st.divider()
@@ -210,28 +274,44 @@ with st.sidebar:
 
 # Main area
 if not st.session_state.logged_in:
-    st.title("🤖 Welcome to AI Assistant Hub")
     st.markdown("""
-    ### Get Started
-    1. Enter your **Username**, **Password**, and **Gemini API Key** in the sidebar
-    2. Click **Login** to access your department
-    3. Start chatting with your AI assistant!
+    <div style="text-align: center; padding: 2rem 0;">
+        <h1 style="font-size: 3.5rem; margin-bottom: 0px;">⚡ AIBold</h1>
+        <p style="font-size: 1.2rem; color: #a29bfe;">Powering the future of AI as a Service</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    ### Features
-    - 🎯 Department-specific AI assistants
-    - 💬 Context-aware conversations
-    - 📊 Usage tracking
-    - 🔒 Role-based access control
-    - 👑 Admin and user permissions
-    """)
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        st.markdown("""
+        ### 🌐 The Internal Hub
+        Welcome to the central intelligence hub for AIBold employees. Log in to access specialized neural nodes tailored for your department.
+        
+        ### 🛠️ Key Capabilities
+        - **Proprietary Knowledge Nodes**: Domain-specific AI models.
+        - **Cross-Dept Collaboration**: Seamless switching between roles.
+        - **Secure Access**: Encrypted session management.
+        """)
+        
+    with col2:
+        st.markdown("""
+        ### 🚀 Quick Start
+        1. Initialize your session via the **Sidebar**.
+        2. Input credentials & your valid **Gemini API Key**.
+        3. Select your specialized **Department Node**.
+        4. Engage with the AIBold Intelligence.
+        
+        > "Boldly going where no AI has gone before."
+        """)
 else:
     # Get current department config
     dept = st.session_state.selected_dept
     config = DEPARTMENTS[dept]
     
     # Header
-    st.title(f"{config['icon']} {dept} AI Assistant")
-    st.caption(f"Logged in as: {st.session_state.username}")
+    st.markdown(f"### {config['icon']} AIBold | {dept} Intelligence Node")
+    st.caption(f"Authenticated as: {st.session_state.username} • Node active")
     
 
     # Display chat messages
@@ -245,9 +325,12 @@ else:
         
         with st.chat_message(role_display):
             st.markdown(message["content"])
+            
+    st.divider()
+    st.caption("⚡ AIBold Core | Proprietary Intelligence Node • High-Priority Connection")
     
     # Chat input
-    prompt = st.chat_input(f"Ask {dept} AI anything...")
+    prompt = st.chat_input(f"Engage {dept} Intelligence Node...")
     
     # Show examples if no messages and no chat input
     if len(messages) == 0 and not prompt:
