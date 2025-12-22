@@ -72,32 +72,30 @@ st.markdown("""
         color: #a29bfe;
     }
     /* Remove black box behind message bar */
-    [data-testid="stBottom"] {
+    [data-testid="stBottom"], [data-testid="stBottomBlockContainer"], .stChatInput {
         background-color: transparent !important;
+        background: none !important;
     }
     
-    [data-testid="stChatInput"] {
-        background-color: transparent !important;
-    }
-
     [data-testid="stChatInputContainer"] {
         background-color: rgba(255, 255, 255, 0.05) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
         border-radius: 12px !important;
     }
-    
-    /* Target the actual textarea for better transparency */
-    [data-testid="stChatInput"] textarea {
+
+    /* Force transparency on all nested divs in the bottom area */
+    [data-testid="stBottom"] * {
         background-color: transparent !important;
-        color: white !important;
+        background: none !important;
     }
 
-    [data-testid="stBottomBlockContainer"] {
-        background-color: transparent !important;
+    /* Ensure the input box itself keeps its slight visibility */
+    [data-testid="stChatInputContainer"], [data-testid="stChatInputContainer"] * {
+        background-color: rgba(255, 255, 255, 0.05) !important;
     }
     
-    [data-testid="stBottom"] > div {
-        background-color: transparent !important;
+    [data-testid="stChatInput"] textarea {
+        color: white !important;
     }
 
     footer {visibility: hidden;}
