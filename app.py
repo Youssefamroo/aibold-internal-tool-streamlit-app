@@ -71,6 +71,22 @@ st.markdown("""
         border: 1px solid rgba(108, 92, 231, 0.2);
         color: #a29bfe;
     }
+    /* Remove black box behind message bar */
+    [data-testid="stBottom"] {
+        background-color: transparent !important;
+    }
+    
+    [data-testid="stChatInput"] {
+        background-color: transparent !important;
+    }
+
+    [data-testid="stChatInputContainer"] {
+        background-color: transparent !important;
+        border: none !important;
+    }
+
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -258,7 +274,16 @@ with st.sidebar:
         st.caption(f"Access: {len(accessible_depts)} department{'s' if len(accessible_depts) > 1 else ''}")
         
         st.divider()
+
+        # Update API Key Option
+        with st.expander("⚙️ Key Management"):
+            new_key = st.text_input("Update Gemini API Key", type="password", value=st.session_state.api_key)
+            if st.button("Save New Key", use_container_width=True):
+                st.session_state.api_key = new_key
+                st.success("Key updated successfully!")
         
+        st.divider()
+
         # Logout
         if st.button("🚪 Logout", use_container_width=True):
             st.session_state.logged_in = False
