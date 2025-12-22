@@ -81,8 +81,23 @@ st.markdown("""
     }
 
     [data-testid="stChatInputContainer"] {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 12px !important;
+    }
+    
+    /* Target the actual textarea for better transparency */
+    [data-testid="stChatInput"] textarea {
         background-color: transparent !important;
-        border: none !important;
+        color: white !important;
+    }
+
+    [data-testid="stBottomBlockContainer"] {
+        background-color: transparent !important;
+    }
+    
+    [data-testid="stBottom"] > div {
+        background-color: transparent !important;
     }
 
     footer {visibility: hidden;}
